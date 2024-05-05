@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/mysql_react_animal_crud/static/css/main.ae37e63f.css",
+    "main.js": "/mysql_react_animal_crud/static/js/main.e75e40f6.js",
+    "static/js/453.43dd381f.chunk.js": "/mysql_react_animal_crud/static/js/453.43dd381f.chunk.js",
+    "index.html": "/mysql_react_animal_crud/index.html",
+    "main.ae37e63f.css.map": "/mysql_react_animal_crud/static/css/main.ae37e63f.css.map",
+    "main.e75e40f6.js.map": "/mysql_react_animal_crud/static/js/main.e75e40f6.js.map",
+    "453.43dd381f.chunk.js.map": "/mysql_react_animal_crud/static/js/453.43dd381f.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ae37e63f.css",
+    "static/js/main.e75e40f6.js"
+  ]
+}
