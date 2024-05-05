@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './index.css';
 
-const baseURL = 'http://localhost:8000'; // Define base URL for API requests
+const baseURL = 'https://mysql-react-animal-crud.onrender.com'; // Define base URL for API requests
 
 const ItemTable = () => {
   const [animals, setAnimals] = useState([]);
