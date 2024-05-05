@@ -2,18 +2,25 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './index.css';
 
+const baseURL = 'http://localhost:8000'; // Define base URL for API requests
+
 const ItemTable = () => {
   const [animals, setAnimals] = useState([]);
-  const [formData, setFormData] = useState({
+  const [createFormVisible, setCreateFormVisible] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    name: '',
+    type: '',
+    scarcity: ''
+  });
+  const [updateFormData, setUpdateFormData] = useState({
     id: null,
     name: '',
     type: '',
     scarcity: ''
   });
-  const [createFormVisible, setCreateFormVisible] = useState(false);
 
   const fetchAnimals = () => {
-    axios.get('http://localhost:8000/get')
+    axios.get(`${baseURL}/get`)
       .then(response => {
         setAnimals(response.data);
       })
@@ -26,11 +33,41 @@ const ItemTable = () => {
     fetchAnimals();
   }, []);
 
+  const handleCreate = (e) => {
+    e.preventDefault();
+
+    axios.post(`${baseURL}/insert`, createFormData)
+      .then(response => {
+        console.log('Animal created successfully');
+        setCreateFormData({ name: '', type: '', scarcity: '' });
+        setCreateFormVisible(false);
+        fetchAnimals();
+      })
+      .catch(error => {
+        console.error('Error creating animal:', error);
+      });
+  };
+
+  const handleUpdate = (e) => {
+    e.preventDefault();
+
+    const { id, name, type, scarcity } = updateFormData;
+
+    axios.put(`${baseURL}/update/${id}`, { name, type, scarcity })
+      .then(response => {
+        console.log('Animal updated successfully');
+        setUpdateFormData({ id: null, name: '', type: '', scarcity: '' });
+        fetchAnimals();
+      })
+      .catch(error => {
+        console.error('Error updating animal:', error);
+      });
+  };
+
   const handleDelete = (animalId) => {
-    axios.delete(`http://localhost:8000/delete/${animalId}`)
+    axios.delete(`${baseURL}/delete/${animalId}`)
       .then(response => {
         console.log('Animal deleted successfully');
-        // Fetch updated animal list after deletion
         fetchAnimals();
       })
       .catch(error => {
@@ -39,71 +76,68 @@ const ItemTable = () => {
   };
 
   const handleModify = (animal) => {
-    setFormData({
+    setUpdateFormData({
       id: animal.id,
       name: animal.name,
       type: animal.type,
       scarcity: animal.scarcity
     });
-    setCreateFormVisible(true); // Show create form with pre-filled data for modification
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const { id, name, type, scarcity } = formData;
-
-    if (id) {
-      // Update existing animal
-      axios.put(`http://localhost:8000/update/${id}`, { name, type, scarcity })
-        .then(response => {
-          console.log('Animal updated successfully');
-          // Reset form data and fetch updated list of animals
-          setFormData({ id: null, name: '', type: '', scarcity: '' });
-          fetchAnimals();
-          setCreateFormVisible(false);
-        })
-        .catch(error => {
-          console.error('Error updating animal:', error);
-        });
-    } else {
-      // Create new animal
-      axios.post('http://localhost:8000/insert', { name, type, scarcity })
-        .then(response => {
-          console.log('Animal created successfully');
-          // Reset form data and fetch updated list of animals
-          setFormData({ id: null, name: '', type: '', scarcity: '' });
-          fetchAnimals();
-          setCreateFormVisible(false);
-        })
-        .catch(error => {
-          console.error('Error creating animal:', error);
-        });
-    }
+    setCreateFormVisible(true); // Show update form with pre-filled data
   };
 
   return (
     <>
       <h1><em>ANIMAL CRUD</em></h1>
-      <button onClick={() => setCreateFormVisible(true)}>Create New Animal</button>
+      <button onClick={() => { setCreateFormData({ name: '', type: '', scarcity: '' }); setCreateFormVisible(true); }}>Create New Animal</button>
+      
+      {/* Create Form */}
       {createFormVisible && (
-        <form onSubmit={handleSubmit}>
-          <input type="hidden" name="id" value={formData.id || ''} />
+        <>
+        <br />
+        <span><strong>CREATE</strong></span>
+        <form onSubmit={handleCreate}>
           <label>
             Name:
-            <input type="text" name="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+            <input type="text" value={createFormData.name} onChange={(e) => setCreateFormData({ ...createFormData, name: e.target.value })} />
           </label>
           <label>
             Type:
-            <input type="text" name="type" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} />
+            <input type="text" value={createFormData.type} onChange={(e) => setCreateFormData({ ...createFormData, type: e.target.value })} />
           </label>
           <label>
             Scarcity:
-            <input type="text" name="scarcity" value={formData.scarcity} onChange={(e) => setFormData({ ...formData, scarcity: e.target.value })} />
+            <input type="text" value={createFormData.scarcity} onChange={(e) => setCreateFormData({ ...createFormData, scarcity: e.target.value })} />
           </label>
-          <button type="submit">{formData.id ? 'Update' : 'Create'}</button>
+          <button type="submit">Create</button>
         </form>
+        </>
       )}
+      <br />
+      {/* Update Form */}
+      {updateFormData.id && (
+        <>
+        <span><strong>MODIFY</strong></span>
+        <form onSubmit={handleUpdate}>
+          <input type="hidden" value={updateFormData.id} />
+          <label>
+            Name:
+            <input type="text" value={updateFormData.name} onChange={(e) => setUpdateFormData({ ...updateFormData, name: e.target.value })} />
+          </label>
+          <label>
+            Type:
+            <input type="text" value={updateFormData.type} onChange={(e) => setUpdateFormData({ ...updateFormData, type: e.target.value })} />
+          </label>
+          <label>
+            Scarcity:
+            <input type="text" value={updateFormData.scarcity} onChange={(e) => setUpdateFormData({ ...updateFormData, scarcity: e.target.value })} />
+          </label>
+          <button type="submit">Update</button>
+        </form>
+        <br />
+        </>
+      )}
+
+      {/* Animal Table */}
       <table>
         <thead>
           <tr>
